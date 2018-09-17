@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+﻿use std::collections::HashMap;
 
 mod tokens;
 mod lexer;
@@ -11,7 +11,7 @@ fn main() {
     context.variable_map.push(HashMap::new());
     context.insert_double(0, "PI".to_owned(), 3.14);
 
-	let input = "\"Hello, World!\" + 1";
+    let input = "\"Hello, World!\" + 1";
 
     let mut lex = lexer::Lexer::new(input);
     lex.tokenize();
@@ -19,7 +19,7 @@ fn main() {
     let lex_output = lex.output;
 
     for x in &lex_output {
-    	println!("{:?}", x);
+        println!("{:?}", x);
     }
 
 
@@ -29,6 +29,6 @@ fn main() {
     let par_output = par.output;
 
     for x in &par_output {
-    	println!("{:?}", x.eval(&context));
-	}
+        println!("{:?}", x.eval(&context));
+    }
 }
