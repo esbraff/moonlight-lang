@@ -11,7 +11,7 @@ fn main() {
     context.variable_map.push(HashMap::new());
     context.insert_double(0, "PI".to_owned(), 3.14);
 
-    let input = "\"Hello, World!\" + 1";
+    let input = "\"Hello, World!\"";
 
     let mut lex = lexer::Lexer::new(input);
     lex.tokenize();

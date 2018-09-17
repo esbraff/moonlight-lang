@@ -1,9 +1,9 @@
 ﻿use interpreter::InterpreterContext;
-use interpreter::Types;
+use interpreter::Value;
 use tokens::TokenType;
 
 pub trait Expression {
-    fn eval(&self, context: &InterpreterContext) -> Types;
+    fn eval(&self, context: &InterpreterContext) -> Value;
 }
 pub struct NumberExpression {
     value: f64
@@ -18,8 +18,8 @@ impl NumberExpression {
 }
 
 impl Expression for NumberExpression {
-    fn eval(&self, context: &InterpreterContext) -> Types {
-        Types::Double(self.value)
+    fn eval(&self, context: &InterpreterContext) -> Value {
+        Value::Double(self.value)
     }
 }
 
@@ -40,13 +40,13 @@ impl BinaryExpression {
 }
 
 impl Expression for BinaryExpression {
-    fn eval(&self, context: &InterpreterContext) -> Types {
+    fn eval(&self, context: &InterpreterContext) -> Value {
         match self.op_type {
             TokenType::Add => self.left_expr.eval(context) + self.right_expr.eval(context),
             TokenType::Substract => self.left_expr.eval(context) - self.right_expr.eval(context),
             TokenType::Multiply => self.left_expr.eval(context) * self.right_expr.eval(context),
             TokenType::Divide => self.left_expr.eval(context) / self.right_expr.eval(context),
-            _ => Types::Null
+            _ => Value::Null
         }
     }
 }
@@ -66,11 +66,11 @@ impl UnaryExpression {
 }
 
 impl Expression for UnaryExpression {
-    fn eval(&self, context: &InterpreterContext) -> Types {
+    fn eval(&self, context: &InterpreterContext) -> Value {
         match self.op_type {
             TokenType::Add => self.expr.eval(context),
             TokenType::Substract => -self.expr.eval(context),
-            _ => Types::Null
+            _ => Value::Null
         }
     }
 }
@@ -88,14 +88,14 @@ impl VariableExpression {
 }
 
 impl Expression for VariableExpression {
-    fn eval(&self, context: &InterpreterContext) -> Types {
+    fn eval(&self, context: &InterpreterContext) -> Value {
         if context.variable_map[0].contains_key(&self.key) {
             let res = context.variable_map[0].get(&self.key).unwrap();
 
             return res.clone();
         }
 
-        Types::Null
+        Value::Null
     }
 }
 
@@ -112,9 +112,9 @@ impl StringExpression {
 }
 
 impl Expression for StringExpression {
-    fn eval(&self, context: &InterpreterContext) -> Types {
+    fn eval(&self, context: &InterpreterContext) -> Value {
         let string = self.value.clone();
 
-        Types::String(string)
+        Value::String(string)
     }
 }
