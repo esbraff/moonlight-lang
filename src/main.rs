@@ -11,9 +11,8 @@ fn main() {
     context.variable_map.push(HashMap::new());
     context.insert_double(0, "PI".to_owned(), 3.14);
 
-    let input = "PI2 <- PI * 2
-                 PI3 <- PI * 3
-                 PI + PI2 + PI3";
+    let input = "Second <- (First <- 1)
+                 First + Second";
 
     let mut lex = lexer::Lexer::new(input);
     lex.tokenize();

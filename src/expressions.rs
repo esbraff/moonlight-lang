@@ -119,9 +119,9 @@ impl Expression for SetVariableExpression {
         let key = self.key.clone();
 
         match val {
-            Value::Double(value) => { context.insert_double(0, key, value); Value::Null },
-            Value::String(value) => { context.insert_string(0, key, value); Value::Null },
-            Value::Table(value) => { context.insert_table(0, key, value); Value::Null },
+            Value::Double(value) => { context.insert_double(0, key, value.clone()); Value::Double(value) },
+            Value::String(value) => { context.insert_string(0, key, value.clone()); Value::String(value) },
+            Value::Table(value) => { context.insert_table(0, key, value.clone()); Value::Table(value) },
             Value::Null => { context.insert_null(0, key); Value::Null }
         }
     }

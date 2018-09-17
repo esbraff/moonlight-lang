@@ -1,4 +1,5 @@
-﻿use std::ops::Neg;
+﻿//use expressions::FuncCallExpression;
+use std::ops::Neg;
 use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Mul;
@@ -11,7 +12,8 @@ pub enum Value {
     Double(f64),
     String(String),
     Table(HashMap<String, Value>),
-    Null
+    //Func(FuncCallExpression),
+    Null,
 }
 
 impl Neg for Value {
