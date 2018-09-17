@@ -114,6 +114,16 @@ impl<'a> Lexer<'a> {
         self.next();
     }
 
+    fn tokenize_setter(&mut self) {
+        if self.next() == '-' {
+            self.add_token(TokenType::Setter, String::new());
+
+            self.next();
+        } else {
+            panic!("Expected \'-\', found \'{}\'", self.peek(0));
+        }
+    }
+
     pub fn tokenize(&mut self) {
         let op_tokens : [TokenType; 6] = [
             TokenType::Add,
@@ -130,6 +140,8 @@ impl<'a> Lexer<'a> {
             if curr_ch == '\"' {
                 self.next();
                 self.tokenize_string();
+            } else if curr_ch == '<' {
+                self.tokenize_setter();
             } else if curr_ch.is_digit(10) {
                 self.tokenize_number();
             } else if curr_ch.is_alphabetic() {

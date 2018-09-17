@@ -2,7 +2,8 @@
 use expressions::NumberExpression;
 use expressions::BinaryExpression;
 use expressions::UnaryExpression;
-use expressions::VariableExpression;
+use expressions::GetVariableExpression;
+use expressions::SetVariableExpression;
 use expressions::StringExpression;
 use tokens::Token;
 use tokens::TokenType;
@@ -36,8 +37,8 @@ impl<'a> Parser<'a> {
         true
     }
 
-    fn peek(&self, relative_position: usize) -> Token {
-        let pos = self.position + relative_position;
+    fn peek(&self, relative_position: i32) -> Token {
+        let pos = (self.position as i32 + relative_position) as usize;
 
         if pos >= self.lenght {
             return Token::new(TokenType::EOF, String::new());
@@ -100,6 +101,9 @@ impl<'a> Parser<'a> {
     fn primary(&mut self) -> Box<Expression> {
         let curr_token = self.peek(0);
 
+        if self.match_type(TokenType::Setter) {
+            return Box::new(SetVariableExpression::new(self.peek(-2).data, self.expression()));
+        }
         if self.match_type(TokenType::Number) {
             return Box::new(NumberExpression::new(curr_token.data.parse().unwrap()));
         }
@@ -107,7 +111,7 @@ impl<'a> Parser<'a> {
             return Box::new(StringExpression::new(curr_token.data));
         }
         if self.match_type(TokenType::KeyWord) {
-            return Box::new(VariableExpression::new(curr_token.data));
+            return Box::new(GetVariableExpression::new(curr_token.data));
         }
         if self.match_type(TokenType::HexNumber) {
             return Box::new(NumberExpression::new(i64::from_str_radix(&curr_token.data, 16).unwrap() as f64));

@@ -1,4 +1,4 @@
-#[derive(Clone)]
+﻿#[derive(Clone)]
 #[derive(Debug)]
 #[derive(PartialEq)]
 pub enum TokenType {
@@ -6,6 +6,7 @@ pub enum TokenType {
 	HexNumber, // any number in hex notation
 	KeyWord,
 	StringValue,
+    Setter, // <-
 
 	Multiply, // *
 	Divide, // /
@@ -24,7 +25,8 @@ impl ToString for TokenType {
     	    TokenType::Number => "Number".to_string(),
     	    TokenType::HexNumber => "HexNumber".to_string(),
     	    TokenType::KeyWord => "KeyWord".to_string(),
-    	    TokenType::StringValue => "StringValue".to_string(),
+            TokenType::StringValue => "StringValue".to_string(),
+    	    TokenType::Setter => "<-".to_string(),
     	    TokenType::Multiply => "*".to_string(),
     	    TokenType::Divide => "/".to_string(),
     	    TokenType::Add => "+".to_string(),

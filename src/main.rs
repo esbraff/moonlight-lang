@@ -11,7 +11,8 @@ fn main() {
     context.variable_map.push(HashMap::new());
     context.insert_double(0, "PI".to_owned(), 3.14);
 
-    let input = "\"Hello, World!\"";
+    let input = "PI2 <- PI * 2
+                 PI + PI2";
 
     let mut lex = lexer::Lexer::new(input);
     lex.tokenize();
@@ -29,6 +30,6 @@ fn main() {
     let par_output = par.output;
 
     for x in &par_output {
-        println!("{:?}", x.eval(&context));
+        println!("{:?}", x.eval(&mut context));
     }
 }

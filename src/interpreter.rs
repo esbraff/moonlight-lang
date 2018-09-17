@@ -91,4 +91,10 @@ impl InterpreterContext {
     pub fn insert_table(&mut self, frame: usize, key: String, value: HashMap<String, Value>) {
         self.variable_map[frame].insert(key, Value::Table(value));
     }
+
+    pub fn insert_null(&mut self, frame: usize, key: String) {
+        if self.variable_map[frame].contains_key(&key) {
+            self.variable_map[frame].remove(&key);
+        }
+    }
 }
