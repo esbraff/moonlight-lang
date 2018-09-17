@@ -97,7 +97,7 @@ impl<'a> Lexer<'a> {
             curr_ch = self.next();
         }
 
-        self.add_token(TokenType::KeyWord, key_word);
+        self.add_token(TokenType::VariableKey, key_word);
     }
 
     fn tokenize_string(&mut self) {

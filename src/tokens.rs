@@ -4,7 +4,7 @@
 pub enum TokenType {
     Number, // any number in decimal notation
     HexNumber, // any number in hex notation
-    KeyWord,
+    VariableKey,
     StringValue,
     Setter, // <-
 
@@ -24,7 +24,7 @@ impl ToString for TokenType {
         match self {
             TokenType::Number => "Number".to_string(),
             TokenType::HexNumber => "HexNumber".to_string(),
-            TokenType::KeyWord => "KeyWord".to_string(),
+            TokenType::VariableKey => "VariableKey".to_string(),
             TokenType::StringValue => "StringValue".to_string(),
             TokenType::Setter => "<-".to_string(),
             TokenType::Multiply => "*".to_string(),

@@ -107,7 +107,7 @@ impl<'a> Parser<'a> {
         if self.match_type(TokenType::StringValue) {
             return Box::new(StringExpression::new(curr_token.data));
         }
-        if self.match_type(TokenType::KeyWord) {
+        if self.match_type(TokenType::VariableKey) {
             if self.match_type(TokenType::Setter) {
                 let var_key_offset = -2;
 
