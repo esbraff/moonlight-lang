@@ -101,9 +101,6 @@ impl<'a> Parser<'a> {
     fn primary(&mut self) -> Box<Expression> {
         let curr_token = self.peek(0);
 
-        if self.match_type(TokenType::Setter) {
-            return Box::new(SetVariableExpression::new(self.peek(-2).data, self.expression()));
-        }
         if self.match_type(TokenType::Number) {
             return Box::new(NumberExpression::new(curr_token.data.parse().unwrap()));
         }
@@ -111,6 +108,9 @@ impl<'a> Parser<'a> {
             return Box::new(StringExpression::new(curr_token.data));
         }
         if self.match_type(TokenType::KeyWord) {
+            if self.match_type(TokenType::Setter) {
+                return Box::new(SetVariableExpression::new(self.peek(-2).data, self.expression()));
+            }
             return Box::new(GetVariableExpression::new(curr_token.data));
         }
         if self.match_type(TokenType::HexNumber) {
