@@ -109,7 +109,9 @@ impl<'a> Parser<'a> {
         }
         if self.match_type(TokenType::KeyWord) {
             if self.match_type(TokenType::Setter) {
-                return Box::new(SetVariableExpression::new(self.peek(-2).data, self.expression()));
+                let var_key_offset = -2;
+
+                return Box::new(SetVariableExpression::new(self.peek(var_key_offset).data, self.expression()));
             }
             return Box::new(GetVariableExpression::new(curr_token.data));
         }
