@@ -12,6 +12,7 @@ fn main() {
     context.insert_double(0, "PI".to_owned(), 3.14);
 
     let input = "
+        PI
         2
         0x01F
         \"string\"
