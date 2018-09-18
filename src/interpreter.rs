@@ -33,6 +33,7 @@ impl Add for Value {
     fn add(self, other: Value) -> Value {
         match (self, other) {
             (Value::Double(value1), Value::Double(value2)) => Value::Double(value1 + value2),
+            (Value::String(value1), Value::String(value2)) => Value::String(value1 + &value2),
             (_, _) => panic!("Cant add items")
         }
     }
