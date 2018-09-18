@@ -82,6 +82,12 @@ impl<'a> Lexer<'a> {
     }
 
     fn tokenize_operator(&mut self, op_type: TokenType) {
+        if op_type == TokenType::Substract && self.next() == '>' {
+            self.add_token(TokenType::ActionPointer, String::new());
+
+            return;
+        }
+
         self.add_token(op_type, String::new());
     }
 

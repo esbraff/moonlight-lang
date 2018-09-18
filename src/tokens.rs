@@ -10,6 +10,7 @@ pub enum TokenType {
     Remover, // ><
     Setter, // <-
     Func, // function
+    ActionPointer, // ->
 
     Multiply, // *
     Divide, // /
@@ -36,6 +37,7 @@ impl ToString for TokenType {
             TokenType::Remover => "><".to_string(),
             TokenType::Setter => "<-".to_string(),
             TokenType::Func => "function".to_string(),
+            TokenType::ActionPointer => "->".to_string(),
             TokenType::Multiply => "*".to_string(),
             TokenType::Divide => "/".to_string(),
             TokenType::Add => "+".to_string(),

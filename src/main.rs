@@ -6,60 +6,39 @@ mod parser;
 mod expressions;
 mod interpreter;
 
+use std::env;
+use std::fs::File;
+use std::io::prelude::*;
+use lexer::Lexer;
+use parser::Parser;
+
 fn main() {
+    let args: Vec<String> = env::args().collect();
+    let file_path = args[1].clone();
+
+    let mut f = File::open(file_path).expect("file not found");
+
+    let mut contents = String::new();
+    f.read_to_string(&mut contents)
+        .expect("something went wrong reading the file");
+
     let mut context = interpreter::InterpreterContext::new();
     context.variable_map.push(HashMap::new());
-    context.insert_double(0, "PI".to_owned(), 3.14);
 
-    let input = "
-        PI
-        2
-        0x01F
-        \"string\"
-        double_var <- 2 + 2 * 2
-        string_var <- \"Hello, World!\"
-        string_var ><
-        double_var <- double_var + (0xAF / 1.5)
-        double_var <- null
+    let mut lexer = Lexer::new(&contents);
+    lexer.tokenize();
 
-        print <- function(value) {
-            value
-        }
+    let mut parser = Parser::new(&lexer.output);
+    parser.parse();
 
-        mulBy2 <- function(value) {
-            multiplied <- value * 2
-
-            multiplied
-        }
-
-        mulBy2(11)
-
-        print(value)
-    ";
-
-    let mut lex = lexer::Lexer::new(input);
-    lex.tokenize();
-
-    let lex_output = lex.output;
-
-    for x in &lex_output {
-        println!("{:?}", x);
-    }
-
-
-    let mut par = parser::Parser::new(&lex_output);
-    par.parse();
-
-    let par_output = par.output;
-
-    for x in par_output {
+    for expr in parser.output {
         use expressions::Expression;
 
-        let result = x.eval(&mut context);
+        let result = expr.eval(&mut context);
 
-        println!("{:?}", x);
+        println!("{:?}", expr);
 
-        match Box::leak(x) {
+        match Box::leak(expr) {
             Expression::CallFunc(_key, _args) => println!("{:?}", result),
             _ => { continue; }
         }

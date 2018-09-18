@@ -125,6 +125,14 @@ impl<'a> Parser<'a> {
                 }
 
                 return Box::new(Expression::Function(exprs, args));
+            } else if self.match_type(TokenType::ActionPointer) {
+                let mut exprs = Vec::new();
+
+                let expr = self.expression();
+
+                exprs.push(expr);
+
+                return Box::new(Expression::Function(exprs, args));
             }
         }
         if self.match_type(TokenType::Null) {
