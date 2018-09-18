@@ -1,10 +1,10 @@
-﻿//use expressions::FuncCallExpression;
+﻿use std::collections::HashMap;
+use expressions::Expression;
 use std::ops::Neg;
 use std::ops::Add;
 use std::ops::Sub;
 use std::ops::Mul;
 use std::ops::Div;
-use std::collections::HashMap;
 
 #[derive(Debug)]
 #[derive(Clone)]
@@ -12,7 +12,7 @@ pub enum Value {
     Double(f64),
     String(String),
     Table(HashMap<String, Value>),
-    //Func(FuncCallExpression),
+    Func(Expression),
     Null,
 }
 
@@ -92,6 +92,10 @@ impl InterpreterContext {
 
     pub fn insert_table(&mut self, frame: usize, key: String, value: HashMap<String, Value>) {
         self.variable_map[frame].insert(key, Value::Table(value));
+    }
+
+    pub fn insert_func(&mut self, frame: usize, key: String, value: Expression) {
+        self.variable_map[frame].insert(key, Value::Func(value));
     }
 
     pub fn insert_null(&mut self, frame: usize, key: String) {

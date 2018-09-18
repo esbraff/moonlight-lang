@@ -1,12 +1,6 @@
 ﻿use expressions::Expression;
-use expressions::NumberExpression;
-use expressions::BinaryExpression;
-use expressions::UnaryExpression;
-use expressions::GetVariableExpression;
-use expressions::SetVariableExpression;
-use expressions::StringExpression;
-use tokens::Token;
 use tokens::TokenType;
+use tokens::Token;
 
 pub struct Parser<'a> {
     pub input: &'a Vec<Token>,
@@ -56,11 +50,11 @@ impl<'a> Parser<'a> {
 
         loop {
             if self.match_type(TokenType::Add) {
-                expr = Box::new(BinaryExpression::new(expr, self.multiplicative(), TokenType::Add));
+                expr = Box::new(Expression::Binary(TokenType::Add, expr, self.multiplicative()));
                 continue;
             }
             if self.match_type(TokenType::Substract) {
-                expr = Box::new(BinaryExpression::new(expr, self.multiplicative(), TokenType::Substract));
+                expr = Box::new(Expression::Binary(TokenType::Substract, expr, self.multiplicative()));
                 continue;
             }
             break;
@@ -74,11 +68,11 @@ impl<'a> Parser<'a> {
 
         loop {
             if self.match_type(TokenType::Multiply) {
-                expr = Box::new(BinaryExpression::new(expr, self.unary(), TokenType::Multiply));
+                expr = Box::new(Expression::Binary(TokenType::Multiply, expr, self.multiplicative()));
                 continue;
             }
             if self.match_type(TokenType::Divide) {
-                expr = Box::new(BinaryExpression::new(expr, self.unary(), TokenType::Divide));
+                expr = Box::new(Expression::Binary(TokenType::Divide, expr, self.multiplicative()));
                 continue;
             }
             break;
@@ -89,10 +83,10 @@ impl<'a> Parser<'a> {
 
     fn unary(&mut self) -> Box<Expression> {
         if self.match_type(TokenType::Substract) {
-            return Box::new(UnaryExpression::new(self.primary(), TokenType::Substract));
+            return Box::new(Expression::Unary(TokenType::Substract, self.primary()));
         }
         if self.match_type(TokenType::Add) {
-            return Box::new(UnaryExpression::new(self.primary(), TokenType::Add));
+            return Box::new(Expression::Unary(TokenType::Add, self.primary()));
         }
 
         self.primary()
@@ -102,21 +96,21 @@ impl<'a> Parser<'a> {
         let curr_token = self.peek(0);
 
         if self.match_type(TokenType::Number) {
-            return Box::new(NumberExpression::new(curr_token.data.parse().unwrap()));
+            return Box::new(Expression::NumberValue(curr_token.data.parse().unwrap()));
         }
         if self.match_type(TokenType::StringValue) {
-            return Box::new(StringExpression::new(curr_token.data));
+            return Box::new(Expression::StringValue(curr_token.data));
         }
         if self.match_type(TokenType::VariableKey) {
             if self.match_type(TokenType::Setter) {
                 let var_key_offset = -2;
 
-                return Box::new(SetVariableExpression::new(self.peek(var_key_offset).data, self.expression()));
+                return Box::new(Expression::SetVariable(self.peek(var_key_offset).data, self.expression()));
             }
-            return Box::new(GetVariableExpression::new(curr_token.data));
+            return Box::new(Expression::GetVariable(curr_token.data));
         }
         if self.match_type(TokenType::HexNumber) {
-            return Box::new(NumberExpression::new(i64::from_str_radix(&curr_token.data, 16).unwrap() as f64));
+            return Box::new(Expression::NumberValue(i64::from_str_radix(&curr_token.data, 16).unwrap() as f64));
         }
         if self.match_type(TokenType::LeftParent) {
             let expr = self.expression();
