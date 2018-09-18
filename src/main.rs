@@ -50,8 +50,8 @@ fn main() {
 
     let mut context = interpreter::InterpreterContext::new();
     context.variable_map.push(HashMap::new());
-    context.insert_rust_func(0, "print".to_owned(), &print, vec!["obj".to_owned()]);
-    context.insert_rust_func(0, "repeat".to_owned(), &repeat, vec!["obj".to_owned()]);
+    context.insert_rust_func(0, "print".to_owned(), &print);
+    context.insert_rust_func(0, "repeat".to_owned(), &repeat);
 
     let mut lexer = Lexer::new(&contents);
     lexer.tokenize();

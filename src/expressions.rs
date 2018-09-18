@@ -55,7 +55,7 @@ impl Expression {
                     Value::String(value) => { context.insert_string(0, key, value.clone()); Value::String(value) },
                     Value::Table(value) => { context.insert_table(0, key, value.clone()); Value::Table(value) },
                     Value::Func(value, args) => { context.insert_func(0, key, value.clone(), args.to_vec()); Value::Func(value, args) },
-                    Value::RustFunc(value, args) => { context.insert_rust_func(0, key, value.clone(), args.to_vec()); Value::RustFunc(value, args) },
+                    Value::RustFunc(value) => { context.insert_rust_func(0, key, value.clone()); Value::RustFunc(value) },
                     Value::Null => { context.insert_null(0, key); Value::Null }
                 }
             },

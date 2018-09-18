@@ -15,7 +15,7 @@ pub enum Value {
     String(String),
     Table(HashMap<String, Value>),
     Func(Vec<Box<Expression>>, Vec<String>),
-    RustFunc(&'static Fn(Vec<Box<Expression>>, &mut InterpreterContext) -> Value, Vec<String>),
+    RustFunc(&'static Fn(Vec<Box<Expression>>, &mut InterpreterContext) -> Value),
     Null,
 }
 
@@ -26,7 +26,7 @@ impl Debug for Value {
             Value::String(value) => write!(f, "{}", value),
             Value::Table(_) => write!(f, "Table"),
             Value::Func(exprs, args) => write!(f, "{:?} {:?}", exprs, args),
-            Value::RustFunc(_, _) => write!(f, "rust function"),
+            Value::RustFunc(_) => write!(f, "rust function"),
             Value::Null => write!(f, "Null")
         }
     }
@@ -117,8 +117,8 @@ impl InterpreterContext {
         self.variable_map[frame].insert(key, Value::Func(value, args));
     }
 
-    pub fn insert_rust_func(&mut self, frame: usize, key: String, value: &'static Fn(Vec<Box<Expression>>, &mut InterpreterContext) -> Value, args: Vec<String>) {
-        self.variable_map[frame].insert(key, Value::RustFunc(value, args));
+    pub fn insert_rust_func(&mut self, frame: usize, key: String, value: &'static Fn(Vec<Box<Expression>>, &mut InterpreterContext) -> Value) {
+        self.variable_map[frame].insert(key, Value::RustFunc(value));
     }
 
     pub fn insert_null(&mut self, frame: usize, key: String) {
@@ -139,7 +139,7 @@ impl InterpreterContext {
                         Value::String(value) => { self.insert_string(0, arg_names[arg_index].clone(), value.clone()); },
                         Value::Table(value) => { self.insert_table(0, arg_names[arg_index].clone(), value.clone()); },
                         Value::Func(value, args) => { self.insert_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
-                        Value::RustFunc(value, args) => { self.insert_rust_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
+                        Value::RustFunc(value) => { self.insert_rust_func(0, arg_names[arg_index].clone(), value.clone()); },
                         Value::Null => { break; }
                     }
                     arg_index += 1;
@@ -155,7 +155,7 @@ impl InterpreterContext {
 
                 return result;
             },
-            Value::RustFunc(func, _) => {
+            Value::RustFunc(func) => {
                 return func(args.to_vec(), self);
             }
             _ => panic!("Attempt to call not a function")
