@@ -34,6 +34,7 @@ impl Add for Value {
         match (self, other) {
             (Value::Double(value1), Value::Double(value2)) => Value::Double(value1 + value2),
             (Value::String(value1), Value::String(value2)) => Value::String(value1 + &value2),
+            (Value::String(value1), Value::Double(value2)) => Value::String(value1 + &value2.to_string()),
             (_, _) => panic!("Cant add items")
         }
     }
