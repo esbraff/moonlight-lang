@@ -1,10 +1,8 @@
-﻿use std::collections::HashMap;
-use interpreter::InterpreterContext;
+﻿use interpreter::InterpreterContext;
 use interpreter::Value;
 use tokens::TokenType;
 
-#[derive(Debug)]
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Expression {
     Null,
     NumberValue(f64),
@@ -14,7 +12,7 @@ pub enum Expression {
     GetVariable(String),
     SetVariable(String, Box<Expression>),
     Function(Vec<Box<Expression>>, Vec<String>),
-    CallFunc(String, Vec<Box<Expression>>)
+    CallFunc(String, Vec<Box<Expression>>),
 }
 
 impl Expression {
@@ -57,13 +55,11 @@ impl Expression {
                     Value::String(value) => { context.insert_string(0, key, value.clone()); Value::String(value) },
                     Value::Table(value) => { context.insert_table(0, key, value.clone()); Value::Table(value) },
                     Value::Func(value, args) => { context.insert_func(0, key, value.clone(), args.to_vec()); Value::Func(value, args) },
+                    Value::RustFunc(value, args) => { context.insert_rust_func(0, key, value.clone(), args.to_vec()); Value::RustFunc(value, args) },
                     Value::Null => { context.insert_null(0, key); Value::Null }
                 }
             },
             Expression::Function(exprs, args) => {
-                for x in args {
-                    println!("{:?}", x);
-                }
                 Value::Func(exprs.to_vec(), args.to_vec())
             },
             Expression::CallFunc(key, args) => {
@@ -81,6 +77,7 @@ impl Expression {
                                     Value::String(value) => { context.insert_string(0, arg_names[arg_index].clone(), value.clone()); },
                                     Value::Table(value) => { context.insert_table(0, arg_names[arg_index].clone(), value.clone()); },
                                     Value::Func(value, args) => { context.insert_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
+                                    Value::RustFunc(value, args) => { context.insert_rust_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
                                     Value::Null => { break; }
                                 }
                                 arg_index += 1;
@@ -96,6 +93,9 @@ impl Expression {
 
                             return result;
                         },
+                        Value::RustFunc(func, arg_names) => {
+                            return func(args.to_vec(), context);
+                        }
                         _ => panic!("Attempt to call not a function")
                     }
                 }

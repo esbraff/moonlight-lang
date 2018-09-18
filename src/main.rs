@@ -1,4 +1,7 @@
-﻿use std::collections::HashMap;
+﻿use interpreter::InterpreterContext;
+use expressions::Expression;
+use interpreter::Value;
+use std::collections::HashMap;
 
 mod tokens;
 mod lexer;
@@ -12,6 +15,14 @@ use std::io::prelude::*;
 use lexer::Lexer;
 use parser::Parser;
 
+fn print(args: Vec<Box<Expression>>, context: &mut InterpreterContext) -> Value {
+    let obj_to_print = args[0].eval(context);
+
+    println!("{:?}", obj_to_print);
+
+    Value::Null
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let file_path = args[1].clone();
@@ -24,6 +35,7 @@ fn main() {
 
     let mut context = interpreter::InterpreterContext::new();
     context.variable_map.push(HashMap::new());
+    context.insert_rust_func(0, "print".to_owned(), &print, vec!["obj".to_owned()]);
 
     let mut lexer = Lexer::new(&contents);
     lexer.tokenize();
@@ -32,15 +44,6 @@ fn main() {
     parser.parse();
 
     for expr in parser.output {
-        use expressions::Expression;
-
-        let result = expr.eval(&mut context);
-
-        println!("{:?}", expr);
-
-        match Box::leak(expr) {
-            Expression::CallFunc(_key, _args) => println!("{:?}", result),
-            _ => { continue; }
-        }
+        expr.eval(&mut context);
     }
 }

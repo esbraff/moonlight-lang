@@ -1,4 +1,7 @@
-﻿use std::collections::HashMap;
+﻿use std::fmt::Debug;
+use std::fmt::Formatter;
+use std::fmt::Error;
+use std::collections::HashMap;
 use expressions::Expression;
 use std::ops::Neg;
 use std::ops::Add;
@@ -6,14 +9,27 @@ use std::ops::Sub;
 use std::ops::Mul;
 use std::ops::Div;
 
-#[derive(Debug)]
 #[derive(Clone)]
 pub enum Value {
     Double(f64),
     String(String),
     Table(HashMap<String, Value>),
     Func(Vec<Box<Expression>>, Vec<String>),
+    RustFunc(&'static Fn(Vec<Box<Expression>>, &mut InterpreterContext) -> Value, Vec<String>),
     Null,
+}
+
+impl Debug for Value {
+    fn fmt(&self, f: &mut Formatter) -> Result<(), Error> {
+        match self {
+            Value::Double(value) => write!(f, "{}", value),
+            Value::String(value) => write!(f, "{}", value),
+            Value::Table(value) => write!(f, "Table"),
+            Value::Func(exprs, args) => write!(f, "{:?} {:?}", exprs, args),
+            Value::RustFunc(func, args) => write!(f, "rust function"),
+            Value::Null => write!(f, "Null")
+        }
+    }
 }
 
 impl Neg for Value {
@@ -99,6 +115,10 @@ impl InterpreterContext {
 
     pub fn insert_func(&mut self, frame: usize, key: String, value: Vec<Box<Expression>>, args: Vec<String>) {
         self.variable_map[frame].insert(key, Value::Func(value, args));
+    }
+
+    pub fn insert_rust_func(&mut self, frame: usize, key: String, value: &'static Fn(Vec<Box<Expression>>, &mut InterpreterContext) -> Value, args: Vec<String>) {
+        self.variable_map[frame].insert(key, Value::RustFunc(value, args));
     }
 
     pub fn insert_null(&mut self, frame: usize, key: String) {
