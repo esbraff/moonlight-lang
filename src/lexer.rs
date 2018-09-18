@@ -97,7 +97,13 @@ impl<'a> Lexer<'a> {
             curr_ch = self.next();
         }
 
-        self.add_token(TokenType::VariableKey, key_word);
+        if key_word == "null".to_string() {
+            self.add_token(TokenType::Null, String::new());
+        } else if key_word == "function".to_string() {
+            self.add_token(TokenType::Func, String::new());
+        } else {
+            self.add_token(TokenType::VariableKey, key_word);
+        }
     }
 
     fn tokenize_string(&mut self) {
@@ -135,13 +141,15 @@ impl<'a> Lexer<'a> {
     }
 
     pub fn tokenize(&mut self) {
-        let op_tokens : [TokenType; 6] = [
+        let op_tokens : [TokenType; 8] = [
             TokenType::Add,
             TokenType::Substract,
             TokenType::Multiply,
             TokenType::Divide,
-            TokenType::LeftParent,
-            TokenType::RightParent
+            TokenType::LeftParen,
+            TokenType::RightParen,
+            TokenType::LeftBrace,
+            TokenType::RightBrace
         ];
 
         while self.position < self.lenght {
@@ -159,7 +167,7 @@ impl<'a> Lexer<'a> {
             } else if curr_ch.is_alphabetic() {
                 self.tokenize_key_word();
             } else {
-                let ch = "+-*/()".find(curr_ch);
+                let ch = "+-*/(){}".find(curr_ch);
 
                 if ch != None {
                     self.tokenize_operator(op_tokens[ch.unwrap()].clone());

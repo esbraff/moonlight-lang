@@ -12,7 +12,7 @@ pub enum Value {
     Double(f64),
     String(String),
     Table(HashMap<String, Value>),
-    Func(Expression),
+    Func(Vec<Box<Expression>>, Vec<String>),
     Null,
 }
 
@@ -94,8 +94,8 @@ impl InterpreterContext {
         self.variable_map[frame].insert(key, Value::Table(value));
     }
 
-    pub fn insert_func(&mut self, frame: usize, key: String, value: Expression) {
-        self.variable_map[frame].insert(key, Value::Func(value));
+    pub fn insert_func(&mut self, frame: usize, key: String, value: Vec<Box<Expression>>, args: Vec<String>) {
+        self.variable_map[frame].insert(key, Value::Func(value, args));
     }
 
     pub fn insert_null(&mut self, frame: usize, key: String) {

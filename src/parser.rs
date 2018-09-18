@@ -93,8 +93,43 @@ impl<'a> Parser<'a> {
     }
 
     fn primary(&mut self) -> Box<Expression> {
-        let curr_token = self.peek(0);
+        let mut curr_token = self.peek(0);
 
+        if self.match_type(TokenType::Func) {
+            let mut args = Vec::new();
+
+            if self.match_type(TokenType::LeftParen) {
+                loop {
+                    curr_token = self.peek(0);
+                    if self.match_type(TokenType::VariableKey) {
+                        let arg_name = curr_token.data;
+
+                        args.push(arg_name);
+                    } else if self.match_type(TokenType::RightParen) {
+                        break;
+                    } else {
+                        let token_type = curr_token.token_type;
+
+                        panic!("Expected {:?} or {:?}, found {:?}", TokenType::RightParen, TokenType::VariableKey, token_type);
+                    }
+                }
+            }
+
+            if self.match_type(TokenType::LeftBrace) {
+                let mut exprs = Vec::new();
+
+                while !self.match_type(TokenType::RightBrace) {
+                    let expr = self.expression();
+
+                    exprs.push(expr);
+                }
+
+                return Box::new(Expression::Function(exprs, args));
+            }
+        }
+        if self.match_type(TokenType::Null) {
+            return Box::new(Expression::Null);
+        }
         if self.match_type(TokenType::Number) {
             return Box::new(Expression::NumberValue(curr_token.data.parse().unwrap()));
         }
@@ -112,14 +147,27 @@ impl<'a> Parser<'a> {
 
                 return Box::new(Expression::SetVariable(self.peek(var_key_offset).data, Box::new(Expression::Null)));
             }
+            if self.match_type(TokenType::LeftParen) {
+                let mut args = Vec::new();
+
+                loop {
+                    if self.match_type(TokenType::RightParen) {
+                        break;
+                    } else {
+                        args.push(self.expression());
+                    }
+                }
+
+                return Box::new(Expression::CallFunc(curr_token.data, args));
+            }
             return Box::new(Expression::GetVariable(curr_token.data));
         }
         if self.match_type(TokenType::HexNumber) {
             return Box::new(Expression::NumberValue(i64::from_str_radix(&curr_token.data, 16).unwrap() as f64));
         }
-        if self.match_type(TokenType::LeftParent) {
+        if self.match_type(TokenType::LeftParen) {
             let expr = self.expression();
-            self.match_type(TokenType::RightParent);
+            self.match_type(TokenType::RightParen);
             return expr;
         }
 

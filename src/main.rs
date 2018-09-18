@@ -20,6 +20,21 @@ fn main() {
         string_var <- \"Hello, World!\"
         string_var ><
         double_var <- double_var + (0xAF / 1.5)
+        double_var <- null
+
+        print <- function(value) {
+            value
+        }
+
+        mulBy2 <- function(value) {
+            multiplied <- value * 2
+
+            multiplied
+        }
+
+        mulBy2(11)
+
+        print(value)
     ";
 
     let mut lex = lexer::Lexer::new(input);
@@ -37,7 +52,16 @@ fn main() {
 
     let par_output = par.output;
 
-    for x in &par_output {
-        println!("{:?}", x.eval(&mut context));
+    for x in par_output {
+        use expressions::Expression;
+
+        let result = x.eval(&mut context);
+
+        println!("{:?}", x);
+
+        match Box::leak(x) {
+            Expression::CallFunc(_key, _args) => println!("{:?}", result),
+            _ => { continue; }
+        }
     }
 }

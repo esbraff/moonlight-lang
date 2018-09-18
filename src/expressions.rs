@@ -1,4 +1,5 @@
-﻿use interpreter::InterpreterContext;
+﻿use std::collections::HashMap;
+use interpreter::InterpreterContext;
 use interpreter::Value;
 use tokens::TokenType;
 
@@ -12,7 +13,8 @@ pub enum Expression {
     Unary(TokenType, Box<Expression>),
     GetVariable(String),
     SetVariable(String, Box<Expression>),
-    Function(Vec<Box<Expression>>)
+    Function(Vec<Box<Expression>>, Vec<String>),
+    CallFunc(String, Vec<Box<Expression>>)
 }
 
 impl Expression {
@@ -54,22 +56,51 @@ impl Expression {
                     Value::Double(value) => { context.insert_double(0, key, value.clone()); Value::Double(value) },
                     Value::String(value) => { context.insert_string(0, key, value.clone()); Value::String(value) },
                     Value::Table(value) => { context.insert_table(0, key, value.clone()); Value::Table(value) },
-                    Value::Func(value) => { context.insert_func(0, key, value.clone()); Value::Func(value) },
+                    Value::Func(value, args) => { context.insert_func(0, key, value.clone(), args.to_vec()); Value::Func(value, args) },
                     Value::Null => { context.insert_null(0, key); Value::Null }
                 }
             },
-            Expression::Function(exprs) => {
-                let mut result = Value::Null;
+            Expression::Function(exprs, args) => {
+                for x in args {
+                    println!("{:?}", x);
+                }
+                Value::Func(exprs.to_vec(), args.to_vec())
+            },
+            Expression::CallFunc(key, args) => {
+                if context.variable_map[0].contains_key(key) {
+                    let value = context.variable_map[0].get(key).unwrap().clone();
 
-                for i in 0..exprs.len() - 1 {
-                    if i == exprs.len() - 1 {
-                        result = exprs[i].eval(context);
-                    } else {
-                        exprs[i].eval(context);
+                    match value {
+                        Value::Func(exprs, arg_names) => {
+                            let mut result = Value::Null;
+                            let mut arg_index = 0;
+
+                            for expr in args {
+                                match expr.eval(context) {
+                                    Value::Double(value) => { context.insert_double(0, arg_names[arg_index].clone(), value.clone()); },
+                                    Value::String(value) => { context.insert_string(0, arg_names[arg_index].clone(), value.clone()); },
+                                    Value::Table(value) => { context.insert_table(0, arg_names[arg_index].clone(), value.clone()); },
+                                    Value::Func(value, args) => { context.insert_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
+                                    Value::Null => { break; }
+                                }
+                                arg_index += 1;
+                            }
+
+                            for expr in exprs {
+                                result = expr.eval(context);
+                            }
+
+                            for key in arg_names {
+                                context.insert_null(0, key);
+                            }
+
+                            return result;
+                        },
+                        _ => panic!("Attempt to call not a function")
                     }
                 }
 
-                result
+                Value::Null
             }
         }
     }

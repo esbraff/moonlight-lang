@@ -9,14 +9,18 @@ pub enum TokenType {
     Null,
     Remover, // ><
     Setter, // <-
+    Func, // function
 
     Multiply, // *
     Divide, // /
     Add, // +
     Substract, // -
 
-    LeftParent, // (
-    RightParent, // )
+    LeftParen, // (
+    RightParen, // )
+
+    LeftBrace, // {
+    RightBrace, // }
 
     EOF // end of file
 }
@@ -31,12 +35,15 @@ impl ToString for TokenType {
             TokenType::Null => "null".to_string(),
             TokenType::Remover => "><".to_string(),
             TokenType::Setter => "<-".to_string(),
+            TokenType::Func => "function".to_string(),
             TokenType::Multiply => "*".to_string(),
             TokenType::Divide => "/".to_string(),
             TokenType::Add => "+".to_string(),
             TokenType::Substract => "-".to_string(),
-            TokenType::LeftParent => "(".to_string(),
-            TokenType::RightParent => ")".to_string(),
+            TokenType::LeftParen => "(".to_string(),
+            TokenType::RightParen => ")".to_string(),
+            TokenType::LeftBrace => "{".to_string(),
+            TokenType::RightBrace => "}".to_string(),
             TokenType::EOF => "EOF".to_string()
         }
     }
