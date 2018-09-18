@@ -35,6 +35,7 @@ impl Add for Value {
             (Value::Double(value1), Value::Double(value2)) => Value::Double(value1 + value2),
             (Value::String(value1), Value::String(value2)) => Value::String(value1 + &value2),
             (Value::String(value1), Value::Double(value2)) => Value::String(value1 + &value2.to_string()),
+            (Value::Double(value1), Value::String(value2)) => Value::String(value1.to_string() + &value2),
             (_, _) => panic!("Cant add items")
         }
     }
