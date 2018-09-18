@@ -66,38 +66,7 @@ impl Expression {
                 if context.variable_map[0].contains_key(key) {
                     let value = context.variable_map[0].get(key).unwrap().clone();
 
-                    match value {
-                        Value::Func(exprs, arg_names) => {
-                            let mut result = Value::Null;
-                            let mut arg_index = 0;
-
-                            for expr in args {
-                                match expr.eval(context) {
-                                    Value::Double(value) => { context.insert_double(0, arg_names[arg_index].clone(), value.clone()); },
-                                    Value::String(value) => { context.insert_string(0, arg_names[arg_index].clone(), value.clone()); },
-                                    Value::Table(value) => { context.insert_table(0, arg_names[arg_index].clone(), value.clone()); },
-                                    Value::Func(value, args) => { context.insert_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
-                                    Value::RustFunc(value, args) => { context.insert_rust_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
-                                    Value::Null => { break; }
-                                }
-                                arg_index += 1;
-                            }
-
-                            for expr in exprs {
-                                result = expr.eval(context);
-                            }
-
-                            for key in arg_names {
-                                context.insert_null(0, key);
-                            }
-
-                            return result;
-                        },
-                        Value::RustFunc(func, arg_names) => {
-                            return func(args.to_vec(), context);
-                        }
-                        _ => panic!("Attempt to call not a function")
-                    }
+                    return context.call_func(&value, args.to_vec());
                 }
 
                 Value::Null

@@ -24,9 +24,9 @@ impl Debug for Value {
         match self {
             Value::Double(value) => write!(f, "{}", value),
             Value::String(value) => write!(f, "{}", value),
-            Value::Table(value) => write!(f, "Table"),
+            Value::Table(_) => write!(f, "Table"),
             Value::Func(exprs, args) => write!(f, "{:?} {:?}", exprs, args),
-            Value::RustFunc(func, args) => write!(f, "rust function"),
+            Value::RustFunc(_, _) => write!(f, "rust function"),
             Value::Null => write!(f, "Null")
         }
     }
@@ -124,6 +124,41 @@ impl InterpreterContext {
     pub fn insert_null(&mut self, frame: usize, key: String) {
         if self.variable_map[frame].contains_key(&key) {
             self.variable_map[frame].remove(&key);
+        }
+    }
+
+    pub fn call_func(&mut self, value: &Value, args: Vec<Box<Expression>>) -> Value {
+        match value {
+            Value::Func(exprs, arg_names) => {
+                let mut result = Value::Null;
+                let mut arg_index = 0;
+
+                for expr in args {
+                    match expr.eval(self) {
+                        Value::Double(value) => { self.insert_double(0, arg_names[arg_index].clone(), value.clone()); },
+                        Value::String(value) => { self.insert_string(0, arg_names[arg_index].clone(), value.clone()); },
+                        Value::Table(value) => { self.insert_table(0, arg_names[arg_index].clone(), value.clone()); },
+                        Value::Func(value, args) => { self.insert_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
+                        Value::RustFunc(value, args) => { self.insert_rust_func(0, arg_names[arg_index].clone(), value.clone(), args.to_vec()); },
+                        Value::Null => { break; }
+                    }
+                    arg_index += 1;
+                }
+
+                for expr in exprs {
+                    result = expr.eval(self);
+                }
+
+                for key in arg_names {
+                    self.insert_null(0, key.to_string());
+                }
+
+                return result;
+            },
+            Value::RustFunc(func, _) => {
+                return func(args.to_vec(), self);
+            }
+            _ => panic!("Attempt to call not a function")
         }
     }
 }

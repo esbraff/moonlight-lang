@@ -23,6 +23,21 @@ fn print(args: Vec<Box<Expression>>, context: &mut InterpreterContext) -> Value 
     Value::Null
 }
 
+fn repeat(args: Vec<Box<Expression>>, context: &mut InterpreterContext) -> Value {
+    let repeats = &args[0].eval(context);
+    let action = &args[1].eval(context);
+
+    match (repeats, action) {
+        (Value::Double(value), Value::Func(_, _)) => {
+            for _ in 0..*value as i32 {
+                context.call_func(action, Vec::new());
+            }
+            Value::Null
+        },
+        (_, _) => { panic!("Nothing to repeat"); }
+    }
+}
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     let file_path = args[1].clone();
@@ -36,6 +51,7 @@ fn main() {
     let mut context = interpreter::InterpreterContext::new();
     context.variable_map.push(HashMap::new());
     context.insert_rust_func(0, "print".to_owned(), &print, vec!["obj".to_owned()]);
+    context.insert_rust_func(0, "repeat".to_owned(), &repeat, vec!["obj".to_owned()]);
 
     let mut lexer = Lexer::new(&contents);
     lexer.tokenize();
