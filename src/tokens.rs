@@ -6,6 +6,8 @@ pub enum TokenType {
     HexNumber, // any number in hex notation
     VariableKey,
     StringValue,
+    Null,
+    Remover, // ><
     Setter, // <-
 
     Multiply, // *
@@ -26,6 +28,8 @@ impl ToString for TokenType {
             TokenType::HexNumber => "HexNumber".to_string(),
             TokenType::VariableKey => "VariableKey".to_string(),
             TokenType::StringValue => "StringValue".to_string(),
+            TokenType::Null => "null".to_string(),
+            TokenType::Remover => "><".to_string(),
             TokenType::Setter => "<-".to_string(),
             TokenType::Multiply => "*".to_string(),
             TokenType::Divide => "/".to_string(),

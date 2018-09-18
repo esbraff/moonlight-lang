@@ -11,8 +11,15 @@ fn main() {
     context.variable_map.push(HashMap::new());
     context.insert_double(0, "PI".to_owned(), 3.14);
 
-    let input = "Second <- (First <- 1)
-                 First + Second";
+    let input = "
+        2
+        0x01F
+        \"string\"
+        double_var <- 2 + 2 * 2
+        string_var <- \"Hello, World!\"
+        string_var ><
+        double_var <- double_var + (0xAF / 1.5)
+    ";
 
     let mut lex = lexer::Lexer::new(input);
     lex.tokenize();

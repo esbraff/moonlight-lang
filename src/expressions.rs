@@ -5,6 +5,7 @@ use tokens::TokenType;
 #[derive(Debug)]
 #[derive(Clone)]
 pub enum Expression {
+    Null,
     NumberValue(f64),
     StringValue(String),
     Binary(TokenType, Box<Expression>, Box<Expression>),
@@ -17,6 +18,7 @@ pub enum Expression {
 impl Expression {
     pub fn eval(&self, context: &mut InterpreterContext) -> Value {
         match self {
+            Expression::Null => Value::Null,
             Expression::NumberValue(value) => Value::Double(*value),
             Expression::StringValue(value) => Value::String(value.to_string()),
             Expression::Binary(op_type, left_expr, right_expr) => {

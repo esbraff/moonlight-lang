@@ -107,6 +107,11 @@ impl<'a> Parser<'a> {
 
                 return Box::new(Expression::SetVariable(self.peek(var_key_offset).data, self.expression()));
             }
+            if self.match_type(TokenType::Remover) {
+                let var_key_offset = -2;
+
+                return Box::new(Expression::SetVariable(self.peek(var_key_offset).data, Box::new(Expression::Null)));
+            }
             return Box::new(Expression::GetVariable(curr_token.data));
         }
         if self.match_type(TokenType::HexNumber) {
