@@ -1,6 +1,6 @@
-﻿use interpreter::InterpreterContext;
-use interpreter::Value;
+﻿use storage::{ StorageVariable, Storage };
 use tokens::TokenType;
+use value::Value;
 
 #[derive(Clone, Debug)]
 pub enum Expression {
@@ -11,65 +11,109 @@ pub enum Expression {
     Unary(TokenType, Box<Expression>),
     GetVariable(String),
     SetVariable(String, Box<Expression>),
-    Function(Vec<Box<Expression>>, Vec<String>),
+    Block(Vec<Box<Expression>>),
+    Function(Box<Expression>, Vec<String>),
     CallFunc(String, Vec<Box<Expression>>),
+    Return(Box<Expression>)
 }
 
 impl Expression {
-    pub fn eval(&self, context: &mut InterpreterContext) -> Value {
+    pub fn eval(&self, storage: &mut Storage) -> Value {
         match self {
             Expression::Null => Value::Null,
-            Expression::NumberValue(value) => Value::Double(*value),
+            Expression::NumberValue(value) => Value::Number(*value),
             Expression::StringValue(value) => Value::String(value.to_string()),
             Expression::Binary(op_type, left_expr, right_expr) => {
+                let left = left_expr.eval(storage);
+                let right = right_expr.eval(storage);
+
                 match op_type {
-                    TokenType::Add => left_expr.eval(context) + right_expr.eval(context),
-                    TokenType::Substract => left_expr.eval(context) - right_expr.eval(context),
-                    TokenType::Multiply => left_expr.eval(context) * right_expr.eval(context),
-                    TokenType::Divide => left_expr.eval(context) / right_expr.eval(context),
+                    TokenType::Add => left + right,
+                    TokenType::Substract => left - right,
+                    TokenType::Multiply => left * right,
+                    TokenType::Divide => left / right,
                     _ => Value::Null
                 }
             },
             Expression::Unary(op_type, expr) => {
                 match op_type {
-                    TokenType::Add => expr.eval(context),
-                    TokenType::Substract => -expr.eval(context),
+                    TokenType::Add => expr.eval(storage),
+                    TokenType::Substract => -expr.eval(storage),
                     _ => Value::Null
                 }
             },
             Expression::GetVariable(key) => {
-                if context.variable_map[0].contains_key(key) {
-                    let res = context.variable_map[0].get(key).unwrap();
-
-                    return res.clone();
-                }
-
-                Value::Null
+                storage.get(StorageVariable::User(key.to_string()))
             },
-            Expression::SetVariable(key, value) => {
-                let val = value.eval(context);
-                let key = key.clone();
+            Expression::SetVariable(key, expr) => {
+                let value = expr.eval(storage);
 
-                match val {
-                    Value::Double(value) => { context.insert_double(0, key, value.clone()); Value::Double(value) },
-                    Value::String(value) => { context.insert_string(0, key, value.clone()); Value::String(value) },
-                    Value::Table(value) => { context.insert_table(0, key, value.clone()); Value::Table(value) },
-                    Value::Func(value, args) => { context.insert_func(0, key, value.clone(), args.to_vec()); Value::Func(value, args) },
-                    Value::RustFunc(value) => { context.insert_rust_func(0, key, value.clone()); Value::RustFunc(value) },
-                    Value::Null => { context.insert_null(0, key); Value::Null }
+                match storage.store(StorageVariable::User(key.to_string()), value.clone()) {
+                    Ok(_) => storage.get(StorageVariable::User(key.to_string())),
+                    Err(_) => {
+                        storage.new_var(key.to_string());
+                        let _ = storage.store(StorageVariable::User(key.to_string()), value);
+                        storage.get(StorageVariable::User(key.to_string()))
+                    }
                 }
             },
-            Expression::Function(exprs, args) => {
-                Value::Func(exprs.to_vec(), args.to_vec())
+            Expression::Block(exprs) => {
+                let mut result = Value::Null;
+
+                storage.scope_start();
+
+                for expr in exprs {
+                    /*match Box::leak(expr.clone()) {
+                        Expression::Return(_) => {
+                            return expr.eval(storage);
+                        },
+                        _ => { expr.eval(storage); }
+                    }*/
+
+                    result = expr.eval(storage);
+                }
+
+                storage.scope_end();
+
+                result
+            },
+            Expression::Function(ref expr, args) => {
+                Value::Function(expr.clone(), args.to_vec())
             },
             Expression::CallFunc(key, args) => {
-                if context.variable_map[0].contains_key(key) {
-                    let value = context.variable_map[0].get(key).unwrap().clone();
+                let func = storage.get(StorageVariable::User(key.to_string()));
+                let mut result = Value::Null;
 
-                    return context.call_func(&value, args.to_vec());
+                match func {
+                    Value::Function(expr, arg_names) => {
+                        storage.scope_start();
+
+                        for i in 0..arg_names.len() {
+                            let key = arg_names[i].to_string();
+                            let value = args[i].eval(storage);
+                            match storage.store(StorageVariable::User(key.to_string()), value.clone()) {
+                                Ok(_) => { },
+                                Err(_) => {
+                                    storage.new_var(key.to_string());
+                                    let _ = storage.store(StorageVariable::User(key.to_string()), value);
+                                }
+                            }
+                        }
+
+                        result = expr.eval(storage).clone();
+
+                        storage.scope_end();
+                    },
+                    Value::NativeFunc(f) => {
+                        f(args.to_vec(), storage);
+                    },
+                    _ => { panic!("Attempt to call not a function"); }
                 }
 
-                Value::Null
+                result
+            },
+            Expression::Return(expr) => {
+                expr.eval(storage)
             }
         }
     }

@@ -94,13 +94,24 @@ impl<'a> Parser<'a> {
 
     fn primary(&mut self) -> Box<Expression> {
         let mut curr_token = self.peek(0);
+        if self.match_type(TokenType::LeftBrace) {
+            let mut exprs = Vec::new();
 
+            while !self.match_type(TokenType::RightBrace) {
+                let expr = self.expression();
+
+                exprs.push(expr);
+            }
+
+            return Box::new(Expression::Block(exprs));
+        }
         if self.match_type(TokenType::Func) {
             let mut args = Vec::new();
 
             if self.match_type(TokenType::LeftParen) {
                 loop {
                     curr_token = self.peek(0);
+
                     if self.match_type(TokenType::VariableKey) {
                         let arg_name = curr_token.data;
 
@@ -115,25 +126,9 @@ impl<'a> Parser<'a> {
                 }
             }
 
-            if self.match_type(TokenType::LeftBrace) {
-                let mut exprs = Vec::new();
+            let expr = self.expression();
 
-                while !self.match_type(TokenType::RightBrace) {
-                    let expr = self.expression();
-
-                    exprs.push(expr);
-                }
-
-                return Box::new(Expression::Function(exprs, args));
-            } else if self.match_type(TokenType::ActionPointer) {
-                let mut exprs = Vec::new();
-
-                let expr = self.expression();
-
-                exprs.push(expr);
-
-                return Box::new(Expression::Function(exprs, args));
-            }
+            return Box::new(Expression::Function(expr, args));
         }
         if self.match_type(TokenType::Null) {
             return Box::new(Expression::Null);

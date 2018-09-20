@@ -1,6 +1,8 @@
-[package]
+﻿[package]
 name = "moonlight"
 version = "0.1.0"
 authors = ["Whelp"]
 
 [dependencies]
+pest = "1.0.6"
+pest_derive = "1.0.8"

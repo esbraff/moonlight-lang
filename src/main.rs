@@ -1,4 +1,4 @@
-﻿use interpreter::InterpreterContext;
+﻿/*use interpreter::InterpreterContext;
 use expressions::Expression;
 use interpreter::Value;
 use std::collections::HashMap;
@@ -23,21 +23,6 @@ fn print(args: Vec<Box<Expression>>, context: &mut InterpreterContext) -> Value 
     Value::Null
 }
 
-fn repeat(args: Vec<Box<Expression>>, context: &mut InterpreterContext) -> Value {
-    let repeats = &args[0].eval(context);
-    let action = &args[1].eval(context);
-
-    match (repeats, action) {
-        (Value::Double(value), Value::Func(_, _)) => {
-            for _ in 0..*value as i32 {
-                context.call_func(action, Vec::new());
-            }
-            Value::Null
-        },
-        (_, _) => { panic!("Nothing to repeat"); }
-    }
-}
-
 fn main() {
     let args: Vec<String> = env::args().collect();
     let file_path = args[1].clone();
@@ -50,8 +35,8 @@ fn main() {
 
     let mut context = interpreter::InterpreterContext::new();
     context.variable_map.push(HashMap::new());
-    context.insert_rust_func(0, "print".to_owned(), &print);
-    context.insert_rust_func(0, "repeat".to_owned(), &repeat);
+
+    context.insert(0, "print".to_owned(), Value::RustFunc(&print));
 
     let mut lexer = Lexer::new(&contents);
     lexer.tokenize();
@@ -61,5 +46,48 @@ fn main() {
 
     for expr in parser.output {
         expr.eval(&mut context);
+    }
+}
+*/
+
+mod stack;
+mod types;
+mod value;
+mod environment;
+mod storage;
+mod tokens;
+mod lexer;
+mod parser;
+mod expressions;
+
+use std::env;
+use std::fs::File;
+use std::io::prelude::*;
+use lexer::Lexer;
+use parser::Parser;
+use storage::Storage;
+
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let file_path = args[1].clone();
+
+    let mut f = File::open(file_path).expect("file not found");
+
+    let mut contents = String::new();
+    f.read_to_string(&mut contents)
+        .expect("something went wrong reading the file");
+
+    let mut storage = Storage::default();
+    storage.init_std();
+
+    let mut lexer = Lexer::new(&contents);
+    lexer.tokenize();
+
+    let mut parser = Parser::new(&lexer.output);
+    parser.parse();
+
+    for expr in parser.output {
+        expr.eval(&mut storage);
     }
 }
