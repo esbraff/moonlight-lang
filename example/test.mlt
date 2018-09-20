@@ -10,7 +10,7 @@ double_var <- null
 
 print <- function(value) -> value
 
-mul <- function(a b) -> a * b
+mul <- function(a b) a * b
 
 mulBy2 <- function(value) {
     multiplied <- mul(value 2)
