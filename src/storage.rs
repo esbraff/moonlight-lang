@@ -90,12 +90,16 @@ impl Storage {
         match var {
             StorageVariable::Local(local) => self.items[local].clone(),
             StorageVariable::User(ident) => {
-                let var: usize = self
+                let var = self
                     .env
                     .borrow()
-                    .get(ident.clone())
-                    .expect(&format!("Variable not found: {}", ident));
-                self.items[var].clone()
+                    .get(ident.clone());
+
+                if var.is_some() {
+                    self.items[var.unwrap()].clone()
+                } else {
+                    Value::Null
+                }
             }
         }
     }

@@ -2,7 +2,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-
 pub type Environment = Rc<RefCell<EnvironmentData>>;
 
 #[derive(Debug, Clone, Default)]
