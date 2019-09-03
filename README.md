@@ -4,7 +4,9 @@ Not fork or clone of `Moonlight` project by `Mono`. Project name is kind of homo
 
 ## Hello, World!
 
+```
 print("Hello, World!");
+```
 
 ## Simple mathematics
 
