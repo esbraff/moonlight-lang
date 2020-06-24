@@ -1,7 +1,3 @@
-# Moonlight
-
-Not fork or clone of `Moonlight` project by `Mono`. Project name is kind of homonym of `Moon Lite` (Lua Lite). Language expected to be simplified version of `Lua`, so it was named like that.
-
 ## Hello, World!
 
 ```
@@ -28,7 +24,7 @@ bar <- " World!"
 baz <- foo + bar
 ```
 
-## ~~Function~~ Procedure definition
+## Function definition
 
 ```
 foo <- function (a b c) {
@@ -38,13 +34,13 @@ foo <- function (a b c) {
 
 Procedure returns last evaluated expression it the it's body so thing below will return sum of three arguments passed to it
 
-## ~~Function~~ Procedure call
+## Function Procedure call
 
 ```
 result <- foo(1 2 3)
 ```
 
-## Single line procedure
+## Single line function
 
 ```
 pow2 <- function(a) a * a
