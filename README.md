@@ -32,7 +32,7 @@ foo <- function (a b c) {
 }
 ```
 
-Procedure returns last evaluated expression it the it's body so thing below will return sum of three arguments passed to it
+Function returns last evaluated expression it the it's body so thing below will return sum of three arguments passed to it
 
 ## Function Procedure call
 
